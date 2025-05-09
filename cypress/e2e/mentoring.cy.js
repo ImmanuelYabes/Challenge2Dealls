@@ -58,6 +58,13 @@ describe("Mentoring Feature", () => {
       // Verify search results
       cy.intercept("GET", "**/mentoring/mentor/list*").as("mentorSearch");
       cy.get("input#searchMentor.ant-input").type("Quality Assurance");
+      cy.wait("@mentorSearch");
+      cy.get('a[class*="MentorCard_mentor_card"]', { timeout: 10000 })
+        .should("have.length.greaterThan", 0)
+        .first()
+        .scrollIntoView()
+        .should("be.visible")
+        .click({ force: true });
 
       // Wait for the API call and assert on the response
       cy.wait("@mentorSearch")
@@ -80,8 +87,16 @@ describe("Mentoring Feature", () => {
     it("should view mentor profile details", () => {
       cy.get('a[href="/mentoring"].flex-col.items-center').click();
 
-      // Click on first mentor card
-      cy.get('a[class*="MentorCard_mentor_card"]').first().click();
+      cy.intercept("GET", "**/mentoring/mentor/list*").as("mentorSearch");
+      cy.get("input#searchMentor.ant-input").type("Quality Assurance");
+      cy.wait("@mentorSearch");
+      cy.wait(500);
+      cy.get('a[class*="MentorCard_mentor_card"]', { timeout: 10000 })
+        .should("have.length.greaterThan", 0)
+        .first()
+        .scrollIntoView()
+        .should("be.visible")
+        .click({ force: true });
 
       // Verify profile details are displayed
       cy.get("h1").should("be.visible");
@@ -90,22 +105,5 @@ describe("Mentoring Feature", () => {
       cy.contains("Total Sessions").should("be.visible");
       cy.contains("Mentees Impacted").should("be.visible");
     });
-
-    // it("should be able to request mentorship", () => {
-    //   cy.get('a[href="/mentoring"].flex-col.items-center').click();
-    //   cy.get(".mentor-card").first().click();
-
-    //   // Click request mentorship button
-    //   cy.contains("Request Mentorship").click();
-
-    //   // Fill request form
-    //   cy.get('textarea[name="message"]').type(
-    //     "I would like to learn more about your expertise"
-    //   );
-    //   cy.get('button[type="submit"]').click();
-
-    //   // Verify success message
-    //   cy.contains("Mentorship request sent successfully");
-    // });
   });
 });
